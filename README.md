@@ -120,7 +120,26 @@ VarianceLbl->Text = variancePredict[0].ToString();
 ```
 
 ### How to use Keras model weights in the C environment ?
-Keras weights are in hdf5 file format. It is converted to a text file for use with the C environment. You can do it as follows:
+Keras weights are in hdf5 file format. I assume you got the model record as .json and .h5. 
+
+```ini
+# keras library import  for Saving and loading model and weights
+
+from keras.models import model_from_json
+from keras.models import load_model
+
+# serialize model to JSON
+#  the keras model which is trained is defined as 'model' in this example
+model_json = model.to_json()
+
+with open("model_save_json.json", "w") as json_file:
+    json_file.write(model_json)
+
+# serialize weights to HDF5
+model.save_weights("model_save_weight.h5")
+```
+
+It is converted to a text file for use with the C environment. You can do it as follows:
 
 ```ini
 python h5_file_to_txt.py model_save_weight.h5
