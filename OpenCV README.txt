@@ -1,9 +1,9 @@
-**********************  KURULUM AYARLARI **********************  
+**********************  OpenCV Setup Information **********************  
 
-OpenCV icin on ayarlar:
+What you should know ?
 
-- Kullanilan OpenCV version 4.1.1
-- Ilk olarak platform Debug x64 olarak seçilmeli
+- Opencv version 4.1.1 used
+- Visual Studio Platform is selected Debug x64 
  
 -> Properties
 	-> VC++ Directories
@@ -13,4 +13,4 @@ OpenCV icin on ayarlar:
 		-> Input
 			-> Additional Dependencies = opencv_world411d.lib
 
-Yukaridaki ayarlar yapildiktan sonra her zaman RUN etmeden once Debug platform seçeneğinin x64 olarak secildiginden emin olun.
+Make sure you have Debug x64 before running the program.

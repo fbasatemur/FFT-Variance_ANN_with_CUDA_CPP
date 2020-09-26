@@ -1,7 +1,7 @@
-CUDA DOSYALARININ CLR PROJESINDE CALISTIRILMASI
+Running CUDA Files in CLR Projects
 
-Bu proje CUDA v10.2 kullanilarak hazirlanmistir.
-Islem Adimlari:
+This project has been prepared with CUDA v10.2.
+Steps:
 
 1) Proje Configuration ayarlari Debug x64 olarak secilmelidir.
 	x64 secenegi yok ise new configuration->x64 secilir ve WIN32'de kullanilan ayarlar dogrudan kopyalanir.
