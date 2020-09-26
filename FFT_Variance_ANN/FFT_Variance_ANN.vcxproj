@@ -22,7 +22,7 @@
     <ProjectGuid>{20158D6F-6C39-4D9A-9FFB-6FEA71E567DC}</ProjectGuid>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <Keyword>ManagedCProj</Keyword>
-    <RootNamespace>Form_Empty</RootNamespace>
+    <RootNamespace>FFT_Variance_ANN</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
