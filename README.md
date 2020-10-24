@@ -5,7 +5,6 @@ Keras model weights are used in the CPP environment.
 ### Requirements
 * Windows or Linux
 * **CUDA == 10.2**: https://developer.nvidia.com/cuda-toolkit-archive
-* **OpenCV == 4.1.1**: https://opencv.org/releases
 * **cuDNN == v8.0.2**: https://developer.nvidia.com/rdp/cudnn-archive
 * **GPU with CC >= 3.0**: https://en.wikipedia.org/wiki/CUDA#GPUs_supported
 * **on Linux GCC or Clang, on Windows MSVC 2017/2019**
@@ -147,20 +146,21 @@ python h5_file_to_txt.py model_save_weight.h5
 
 Each layer in the model will be saved in a folder and their weight in it. The text files will then be loaded into the model layers.
 
-### Results
+## Results
 
-**Blurry**
+### Blurry
 
 ![alt text](https://github.com/fbasatemur/FFT-Variance_ANN_with_CUDA_CPP/blob/master/doc/ss_blurry.jpg)
 
-**Clear**
+### Clear
 
 ![alt text](https://github.com/fbasatemur/FFT-Variance_ANN_with_CUDA_CPP/blob/master/doc/ss_clear.jpg)
 
-**Multiple Images**
+### Multiple Images
+**The values predicted by the model for more than one image can be observed from the graph.**
 
 ![alt text](https://github.com/fbasatemur/FFT-Variance_ANN_with_CUDA_CPP/blob/master/doc/ss_multi_1.jpg)
 
-**Multiple Images**
+### Multiple Images
 
 ![alt text](https://github.com/fbasatemur/FFT-Variance_ANN_with_CUDA_CPP/blob/master/doc/ss_multi_2.jpg)
