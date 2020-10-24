@@ -156,3 +156,11 @@ Each layer in the model will be saved in a folder and their weight in it. The te
 **Clear**
 
 ![alt text](https://github.com/fbasatemur/FFT-Variance_ANN_with_CUDA_CPP/blob/master/doc/ss_clear.jpg)
+
+**Multiple Images**
+
+![alt text](https://github.com/fbasatemur/FFT-Variance_ANN_with_CUDA_CPP/blob/master/doc/ss_multi_1.jpg)
+
+**Multiple Images**
+
+![alt text](https://github.com/fbasatemur/FFT-Variance_ANN_with_CUDA_CPP/blob/master/doc/ss_multi_2.jpg)

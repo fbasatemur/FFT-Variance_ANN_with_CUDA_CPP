@@ -1,21 +1,19 @@
 ﻿#pragma once
 #include<windows.h>
 #include <atlstr.h>		
+#include <Windows.h>
+#include "Image.h"
+#include "Process.h"
 
 #include<iostream>
 #include <cuda_runtime_api.h>						// cudaDeviceSynchronize()
 #include <time.h>
-#include <msclr\marshal_cppstd.h>
-#include <msclr\marshal.h>
 #include <string.h>
 
 #include "CpuGpuMat.h"
 #include "KernelGpu.cuh"
-#include "ImageProcessing.h"
 #include "Dense.h"
 #include "BatchNormalization.h"
-#include <opencv2/imgcodecs/imgcodecs.hpp>
-#include <opencv2/highgui/highgui.hpp>
 
 namespace Form_Empty {
 
@@ -65,6 +63,7 @@ namespace Form_Empty {
 	private: System::Windows::Forms::Label^ VarianceLbl;
 	private: System::Windows::Forms::Label^ label3;
 	private: System::Windows::Forms::Label^ imagePathLbl;
+	private: System::Windows::Forms::DataVisualization::Charting::Chart^ chart1;
 
 	protected:
 
@@ -82,6 +81,9 @@ namespace Form_Empty {
 
 		void InitializeComponent(void)
 		{
+			System::Windows::Forms::DataVisualization::Charting::ChartArea^ chartArea1 = (gcnew System::Windows::Forms::DataVisualization::Charting::ChartArea());
+			System::Windows::Forms::DataVisualization::Charting::Legend^ legend1 = (gcnew System::Windows::Forms::DataVisualization::Charting::Legend());
+			System::Windows::Forms::DataVisualization::Charting::Series^ series1 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
 			this->menuStrip1 = (gcnew System::Windows::Forms::MenuStrip());
 			this->fileToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->openToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
@@ -94,9 +96,11 @@ namespace Form_Empty {
 			this->VarianceLbl = (gcnew System::Windows::Forms::Label());
 			this->label3 = (gcnew System::Windows::Forms::Label());
 			this->imagePathLbl = (gcnew System::Windows::Forms::Label());
+			this->chart1 = (gcnew System::Windows::Forms::DataVisualization::Charting::Chart());
 			this->menuStrip1->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox1))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox2))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->chart1))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// menuStrip1
@@ -105,7 +109,7 @@ namespace Form_Empty {
 			this->menuStrip1->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(1) { this->fileToolStripMenuItem });
 			this->menuStrip1->Location = System::Drawing::Point(0, 0);
 			this->menuStrip1->Name = L"menuStrip1";
-			this->menuStrip1->Size = System::Drawing::Size(1241, 28);
+			this->menuStrip1->Size = System::Drawing::Size(1728, 28);
 			this->menuStrip1->TabIndex = 0;
 			this->menuStrip1->Text = L"menuStrip1";
 			// 
@@ -126,6 +130,8 @@ namespace Form_Empty {
 			// openFileDialog1
 			// 
 			this->openFileDialog1->FileName = L"openFileDialog1";
+			this->openFileDialog1->Filter = L"bmp files (*.bmp)|*.bmp";
+			this->openFileDialog1->Multiselect = true;
 			// 
 			// pictureBox1
 			// 
@@ -199,11 +205,29 @@ namespace Form_Empty {
 			this->imagePathLbl->TabIndex = 18;
 			this->imagePathLbl->Text = L"...";
 			// 
+			// chart1
+			// 
+			chartArea1->Name = L"ChartArea1";
+			this->chart1->ChartAreas->Add(chartArea1);
+			legend1->Name = L"Legend1";
+			this->chart1->Legends->Add(legend1);
+			this->chart1->Location = System::Drawing::Point(1073, 189);
+			this->chart1->Name = L"chart1";
+			series1->ChartArea = L"ChartArea1";
+			series1->ChartType = System::Windows::Forms::DataVisualization::Charting::SeriesChartType::Point;
+			series1->Legend = L"Legend1";
+			series1->Name = L"Variance";
+			this->chart1->Series->Add(series1);
+			this->chart1->Size = System::Drawing::Size(641, 402);
+			this->chart1->TabIndex = 19;
+			this->chart1->Text = L"chart1";
+			// 
 			// MyForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(1241, 603);
+			this->ClientSize = System::Drawing::Size(1728, 603);
+			this->Controls->Add(this->chart1);
 			this->Controls->Add(this->imagePathLbl);
 			this->Controls->Add(this->label3);
 			this->Controls->Add(this->VarianceLbl);
@@ -222,6 +246,7 @@ namespace Form_Empty {
 			this->menuStrip1->PerformLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox1))->EndInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox2))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->chart1))->EndInit();
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
@@ -236,32 +261,32 @@ namespace Form_Empty {
 
 		CpuGpuMat inputImage(1, 625);
 
-		std::string denseKernel = ".\\model_save_weight.h5_to_txt\\dense\\kernel.txt";
-		std::string denseBias = ".\\model_save_weight.h5_to_txt\\dense\\bias.txt";
+		std::string denseKernel = ".\\model_save_weight.h5_to_txt\\dense_9\\kernel.txt";
+		std::string denseBias = ".\\model_save_weight.h5_to_txt\\dense_9\\bias.txt";
 
-		std::string dense1Kernel = ".\\model_save_weight.h5_to_txt\\dense_1\\kernel.txt";
-		std::string dense1Bias = ".\\model_save_weight.h5_to_txt\\dense_1\\bias.txt";
+		std::string dense1Kernel = ".\\model_save_weight.h5_to_txt\\dense_10\\kernel.txt";
+		std::string dense1Bias = ".\\model_save_weight.h5_to_txt\\dense_10\\bias.txt";
 
-		std::string dense2Kernel = ".\\model_save_weight.h5_to_txt\\dense_2\\kernel.txt";
-		std::string dense2Bias = ".\\model_save_weight.h5_to_txt\\dense_2\\bias.txt";
+		std::string dense2Kernel = ".\\model_save_weight.h5_to_txt\\dense_11\\kernel.txt";
+		std::string dense2Bias = ".\\model_save_weight.h5_to_txt\\dense_11\\bias.txt";
 
-		std::string dense3Kernel = ".\\model_save_weight.h5_to_txt\\dense_3\\kernel.txt";
-		std::string dense3Bias = ".\\model_save_weight.h5_to_txt\\dense_3\\bias.txt";
+		std::string dense3Kernel = ".\\model_save_weight.h5_to_txt\\dense_12\\kernel.txt";
+		std::string dense3Bias = ".\\model_save_weight.h5_to_txt\\dense_12\\bias.txt";
 
-		std::string dense4Kernel = ".\\model_save_weight.h5_to_txt\\dense_4\\kernel.txt";
-		std::string dense4Bias = ".\\model_save_weight.h5_to_txt\\dense_4\\bias.txt";
+		std::string dense4Kernel = ".\\model_save_weight.h5_to_txt\\dense_13\\kernel.txt";
+		std::string dense4Bias = ".\\model_save_weight.h5_to_txt\\dense_13\\bias.txt";
 
-		std::string dense5Kernel = ".\\model_save_weight.h5_to_txt\\dense_5\\kernel.txt";
-		std::string dense5Bias = ".\\model_save_weight.h5_to_txt\\dense_5\\bias.txt";
+		std::string dense5Kernel = ".\\model_save_weight.h5_to_txt\\dense_14\\kernel.txt";
+		std::string dense5Bias = ".\\model_save_weight.h5_to_txt\\dense_14\\bias.txt";
 
-		std::string dense6Kernel = ".\\model_save_weight.h5_to_txt\\dense_6\\kernel.txt";
-		std::string dense6Bias = ".\\model_save_weight.h5_to_txt\\dense_6\\bias.txt";
+		std::string dense6Kernel = ".\\model_save_weight.h5_to_txt\\dense_15\\kernel.txt";
+		std::string dense6Bias = ".\\model_save_weight.h5_to_txt\\dense_15\\bias.txt";
 
-		std::string dense7Kernel = ".\\model_save_weight.h5_to_txt\\dense_7\\kernel.txt";
-		std::string dense7Bias = ".\\model_save_weight.h5_to_txt\\dense_7\\bias.txt";
+		std::string dense7Kernel = ".\\model_save_weight.h5_to_txt\\dense_16\\kernel.txt";
+		std::string dense7Bias = ".\\model_save_weight.h5_to_txt\\dense_16\\bias.txt";
 
-		std::string dense8Kernel = ".\\model_save_weight.h5_to_txt\\dense_8\\kernel.txt";
-		std::string dense8Bias = ".\\model_save_weight.h5_to_txt\\dense_8\\bias.txt";
+		std::string dense8Kernel = ".\\model_save_weight.h5_to_txt\\dense_17\\kernel.txt";
+		std::string dense8Bias = ".\\model_save_weight.h5_to_txt\\dense_17\\bias.txt";
 
 		Dense dense(100, inputImage.Rows, inputImage.Cols);
 		Dense dense1(100, dense.Result.Rows, dense.Result.Cols);
@@ -275,7 +300,7 @@ namespace Form_Empty {
 
 		// load kernel and bias weights to ram
 
-		dense.load(denseKernel, denseBias);				
+		dense.load(denseKernel, denseBias);
 		dense1.load(dense1Kernel, dense1Bias);
 		dense2.load(dense2Kernel, dense2Bias);
 		dense3.load(dense3Kernel, dense3Bias);
@@ -285,45 +310,45 @@ namespace Form_Empty {
 		dense7.load(dense7Kernel, dense7Bias);
 		dense8.load(dense8Kernel, dense8Bias);
 
-		std::string batchNormBeta = ".\\model_save_weight.h5_to_txt\\batch_normalization\\beta.txt";
-		std::string batchNormGamma = ".\\model_save_weight.h5_to_txt\\batch_normalization\\gamma.txt";
-		std::string batchNormMovingMean = ".\\model_save_weight.h5_to_txt\\batch_normalization\\moving_mean.txt";
-		std::string batchNormMovingVariance = ".\\model_save_weight.h5_to_txt\\batch_normalization\\moving_variance.txt";
+		std::string batchNormBeta = ".\\model_save_weight.h5_to_txt\\batch_normalization_8\\beta.txt";
+		std::string batchNormGamma = ".\\model_save_weight.h5_to_txt\\batch_normalization_8\\gamma.txt";
+		std::string batchNormMovingMean = ".\\model_save_weight.h5_to_txt\\batch_normalization_8\\moving_mean.txt";
+		std::string batchNormMovingVariance = ".\\model_save_weight.h5_to_txt\\batch_normalization_8\\moving_variance.txt";
 
-		std::string batchNorm1Beta = ".\\model_save_weight.h5_to_txt\\batch_normalization_1\\beta.txt";
-		std::string batchNorm1Gamma = ".\\model_save_weight.h5_to_txt\\batch_normalization_1\\gamma.txt";
-		std::string batchNorm1MovingMean = ".\\model_save_weight.h5_to_txt\\batch_normalization_1\\moving_mean.txt";
-		std::string batchNorm1MovingVariance = ".\\model_save_weight.h5_to_txt\\batch_normalization_1\\moving_variance.txt";
+		std::string batchNorm1Beta = ".\\model_save_weight.h5_to_txt\\batch_normalization_9\\beta.txt";
+		std::string batchNorm1Gamma = ".\\model_save_weight.h5_to_txt\\batch_normalization_9\\gamma.txt";
+		std::string batchNorm1MovingMean = ".\\model_save_weight.h5_to_txt\\batch_normalization_9\\moving_mean.txt";
+		std::string batchNorm1MovingVariance = ".\\model_save_weight.h5_to_txt\\batch_normalization_9\\moving_variance.txt";
 
-		std::string batchNorm2Beta = ".\\model_save_weight.h5_to_txt\\batch_normalization_2\\beta.txt";
-		std::string batchNorm2Gamma = ".\\model_save_weight.h5_to_txt\\batch_normalization_2\\gamma.txt";
-		std::string batchNorm2MovingMean = ".\\model_save_weight.h5_to_txt\\batch_normalization_2\\moving_mean.txt";
-		std::string batchNorm2MovingVariance = ".\\model_save_weight.h5_to_txt\\batch_normalization_2\\moving_variance.txt";
+		std::string batchNorm2Beta = ".\\model_save_weight.h5_to_txt\\batch_normalization_10\\beta.txt";
+		std::string batchNorm2Gamma = ".\\model_save_weight.h5_to_txt\\batch_normalization_10\\gamma.txt";
+		std::string batchNorm2MovingMean = ".\\model_save_weight.h5_to_txt\\batch_normalization_10\\moving_mean.txt";
+		std::string batchNorm2MovingVariance = ".\\model_save_weight.h5_to_txt\\batch_normalization_10\\moving_variance.txt";
 
-		std::string batchNorm3Beta = ".\\model_save_weight.h5_to_txt\\batch_normalization_3\\beta.txt";
-		std::string batchNorm3Gamma = ".\\model_save_weight.h5_to_txt\\batch_normalization_3\\gamma.txt";
-		std::string batchNorm3MovingMean = ".\\model_save_weight.h5_to_txt\\batch_normalization_3\\moving_mean.txt";
-		std::string batchNorm3MovingVariance = ".\\model_save_weight.h5_to_txt\\batch_normalization_3\\moving_variance.txt";
+		std::string batchNorm3Beta = ".\\model_save_weight.h5_to_txt\\batch_normalization_11\\beta.txt";
+		std::string batchNorm3Gamma = ".\\model_save_weight.h5_to_txt\\batch_normalization_11\\gamma.txt";
+		std::string batchNorm3MovingMean = ".\\model_save_weight.h5_to_txt\\batch_normalization_11\\moving_mean.txt";
+		std::string batchNorm3MovingVariance = ".\\model_save_weight.h5_to_txt\\batch_normalization_11\\moving_variance.txt";
 
-		std::string batchNorm4Beta = ".\\model_save_weight.h5_to_txt\\batch_normalization_4\\beta.txt";
-		std::string batchNorm4Gamma = ".\\model_save_weight.h5_to_txt\\batch_normalization_4\\gamma.txt";
-		std::string batchNorm4MovingMean = ".\\model_save_weight.h5_to_txt\\batch_normalization_4\\moving_mean.txt";
-		std::string batchNorm4MovingVariance = ".\\model_save_weight.h5_to_txt\\batch_normalization_4\\moving_variance.txt";
+		std::string batchNorm4Beta = ".\\model_save_weight.h5_to_txt\\batch_normalization_12\\beta.txt";
+		std::string batchNorm4Gamma = ".\\model_save_weight.h5_to_txt\\batch_normalization_12\\gamma.txt";
+		std::string batchNorm4MovingMean = ".\\model_save_weight.h5_to_txt\\batch_normalization_12\\moving_mean.txt";
+		std::string batchNorm4MovingVariance = ".\\model_save_weight.h5_to_txt\\batch_normalization_12\\moving_variance.txt";
 
-		std::string batchNorm5Beta = ".\\model_save_weight.h5_to_txt\\batch_normalization_5\\beta.txt";
-		std::string batchNorm5Gamma = ".\\model_save_weight.h5_to_txt\\batch_normalization_5\\gamma.txt";
-		std::string batchNorm5MovingMean = ".\\model_save_weight.h5_to_txt\\batch_normalization_5\\moving_mean.txt";
-		std::string batchNorm5MovingVariance = ".\\model_save_weight.h5_to_txt\\batch_normalization_5\\moving_variance.txt";
+		std::string batchNorm5Beta = ".\\model_save_weight.h5_to_txt\\batch_normalization_13\\beta.txt";
+		std::string batchNorm5Gamma = ".\\model_save_weight.h5_to_txt\\batch_normalization_13\\gamma.txt";
+		std::string batchNorm5MovingMean = ".\\model_save_weight.h5_to_txt\\batch_normalization_13\\moving_mean.txt";
+		std::string batchNorm5MovingVariance = ".\\model_save_weight.h5_to_txt\\batch_normalization_13\\moving_variance.txt";
 
-		std::string batchNorm6Beta = ".\\model_save_weight.h5_to_txt\\batch_normalization_6\\beta.txt";
-		std::string batchNorm6Gamma = ".\\model_save_weight.h5_to_txt\\batch_normalization_6\\gamma.txt";
-		std::string batchNorm6MovingMean = ".\\model_save_weight.h5_to_txt\\batch_normalization_6\\moving_mean.txt";
-		std::string batchNorm6MovingVariance = ".\\model_save_weight.h5_to_txt\\batch_normalization_6\\moving_variance.txt";
+		std::string batchNorm6Beta = ".\\model_save_weight.h5_to_txt\\batch_normalization_14\\beta.txt";
+		std::string batchNorm6Gamma = ".\\model_save_weight.h5_to_txt\\batch_normalization_14\\gamma.txt";
+		std::string batchNorm6MovingMean = ".\\model_save_weight.h5_to_txt\\batch_normalization_14\\moving_mean.txt";
+		std::string batchNorm6MovingVariance = ".\\model_save_weight.h5_to_txt\\batch_normalization_14\\moving_variance.txt";
 
-		std::string batchNorm7Beta = ".\\model_save_weight.h5_to_txt\\batch_normalization_7\\beta.txt";
-		std::string batchNorm7Gamma = ".\\model_save_weight.h5_to_txt\\batch_normalization_7\\gamma.txt";
-		std::string batchNorm7MovingMean = ".\\model_save_weight.h5_to_txt\\batch_normalization_7\\moving_mean.txt";
-		std::string batchNorm7MovingVariance = ".\\model_save_weight.h5_to_txt\\batch_normalization_7\\moving_variance.txt";
+		std::string batchNorm7Beta = ".\\model_save_weight.h5_to_txt\\batch_normalization_15\\beta.txt";
+		std::string batchNorm7Gamma = ".\\model_save_weight.h5_to_txt\\batch_normalization_15\\gamma.txt";
+		std::string batchNorm7MovingMean = ".\\model_save_weight.h5_to_txt\\batch_normalization_15\\moving_mean.txt";
+		std::string batchNorm7MovingVariance = ".\\model_save_weight.h5_to_txt\\batch_normalization_15\\moving_variance.txt";
 
 		// gamma = 1.0F, beta = 0.0F, epsilon = 0.001F 
 
@@ -370,74 +395,160 @@ namespace Form_Empty {
 
 		if (openFileDialog1->ShowDialog() == System::Windows::Forms::DialogResult::OK)
 		{
-			pictureBox1->ImageLocation = openFileDialog1->FileName;
-			imagePathLbl->Text = openFileDialog1->FileName;
 
-			msclr::interop::marshal_context context;
-			cv::Mat grayImage = cv::imread(context.marshal_as<cv::String>(openFileDialog1->FileName), cv::IMREAD_GRAYSCALE);
+			long size;
+			int width, height;
+			BYTE* buffer, * raw_intensity;
 
-			cv::Rect cropSizeImage(grayImage.cols / 2 - 51, grayImage.rows / 2 - 51, 100, 100);
-			cv::Mat cutGrayImage = grayImage(cropSizeImage);
+			int cutRawWidth = 100;												// image size cut out from center
+			int cutRawHeight = 100;							
+
+			double* Real_part = new double[cutRawWidth * cutRawHeight];			// FFT Reals
+			double* Im_part = new double[cutRawWidth * cutRawHeight];			// FFT imaginary
+			double* image = new double[cutRawWidth * cutRawHeight];				// FFT magnitude values
+
+			const int cutFFTWidth = 25;
+			const int cutFFTHeight = 25;
+			double* cutFFT = new double[cutFFTWidth * cutFFTHeight];			// 25 * 25 FFT mag values
+			double* fourier = new double[cutFFTWidth * cutFFTHeight];			// 25 * 25 FFT normalize (0-1) values
+
+			int beginRow, beginCol;
+			int setRow, setCol;
+
+			Bitmap^ surface = gcnew Bitmap(cutFFTWidth, cutFFTHeight);
+			pictureBox2->Image = surface;
+			Color c;
+
+			chart1->Series["Variance"]->Points->Clear();
+
+			for (int imageIndex = 0; imageIndex < openFileDialog1->FileNames->GetLength(0); imageIndex++) 
+			{
+
+				imagePathLbl->Text = openFileDialog1->FileNames[imageIndex];
+				pictureBox1->ImageLocation = openFileDialog1->FileNames[imageIndex];
+				CString str = openFileDialog1->FileNames[imageIndex];
+
+				// read BMP image
+				buffer = LoadBMP(width, height, size, (LPCTSTR)str);
+				raw_intensity = ConvertBMPToIntensity(buffer, width, height);
+
+				
+				beginRow = (height - cutRawHeight) / 2;
+				beginCol = (width - cutRawWidth) / 2;
+
+				// image is cut 100 *100 size from center of raw_intensity
+				// Gri seviyeyedeki image frekans domeninde ortalanmasi için (-1)^(x+y) ile carpiliyor
+				for (int i = beginRow; i < beginRow + 100; i++)
+					for (int j = beginCol; j < beginCol + 100; j++)
+						image[(i - beginRow) * cutRawWidth + (j - beginCol)] = double(raw_intensity[i * width + j]) * pow(-1, (i + j));
 
 
-			cv::Mat fftImage = openCVFFT(cutGrayImage);
-			cv::Rect cropSizeFFT(24, 24, 25, 25);
-			cv::Mat cutFFT = fftImage(cropSizeFFT);
-
-			pictureBox2->Image = fftMat2Bitmap(cutFFT, (float*)inputImage.CpuP);	// set cutFFT values to inputImage
-			
-			/*
-				Host => ram
-				Device => graphics memory
-			*/
-
-			inputImage.host2Device();
+				// calculate 100 * 100 size FFT image
+				FFT2D(image, Real_part, Im_part, cutRawWidth, cutRawHeight);
 
 
-			clock_t start = clock();
+				double fftValue;
+				double maks1 = -1000000000;
+				double min1 = 1000000000;
 
-			dense.apply(&inputImage);
-			gpuRelu(&dense.Result);
-			batchNorm.apply(&dense.Result);
+				// 25 * 25 pixels FFT image cut 
+				for (int i = 25; i < 50; i++) {
+					for (int j = 25; j < 50; j++) {
 
-			dense1.apply(&dense.Result);
-			gpuRelu(&dense1.Result);
-			batchNorm1.apply(&dense1.Result);
+						setRow = (i - cutFFTHeight);
+						setCol = (j - cutFFTWidth);
+						fftValue = log(0.05 + sqrt(Real_part[i * cutRawWidth + j] * Real_part[i * cutRawWidth + j] + Im_part[i * cutRawWidth + j] * Im_part[i * cutRawWidth + j]));
+						cutFFT[setRow * cutFFTWidth + setCol] = fftValue;
 
-			dense2.apply(&dense1.Result);
-			gpuRelu(&dense2.Result);
-			batchNorm2.apply(&dense2.Result);
+						if (fftValue > maks1)
+							maks1 = fftValue;
+						if (fftValue < min1)
+							min1 = fftValue;
+					}
+				}
 
-			dense3.apply(&dense2.Result);
-			gpuRelu(&dense3.Result);
-			batchNorm3.apply(&dense3.Result);
+				// 25*25 FFT image 0-1 normalize
+				for (int i = 0; i < cutFFTHeight; i++)
+					for (int j = 0; j < cutFFTWidth; j++)
+						fourier[i * cutFFTWidth + j] = (cutFFT[i * cutFFTWidth + j] - min1) / (maks1 - min1);
 
-			dense4.apply(&dense3.Result);
-			gpuRelu(&dense4.Result);
-			batchNorm4.apply(&dense4.Result);
 
-			dense5.apply(&dense4.Result);
-			gpuRelu(&dense5.Result);
-			batchNorm5.apply(&dense5.Result);
+				// ANN input values pointer
+				float* inputP = (float*)inputImage.CpuP;
 
-			dense6.apply(&dense5.Result);
-			gpuRelu(&dense6.Result);
-			batchNorm6.apply(&dense6.Result);
 
-			dense7.apply(&dense6.Result);
-			gpuRelu(&dense7.Result);
-			batchNorm7.apply(&dense7.Result);
+				// display in pictureBox and ANN input values is setted
+				for (int row = 0; row < cutFFTHeight; row++)
+					for (int col = 0; col < cutFFTWidth; col++) {
 
-			dense8.apply(&dense7.Result);
-			gpuSigmoid(&dense8.Result);
-			dense8.Result.device2Host();
+						inputP[row * cutFFTWidth + col] = float(fourier[row * cutFFTWidth + col]);
 
-			clock_t end = clock();
-			MultTimeLbl->Text = ((float)(end - start) / CLOCKS_PER_SEC).ToString() + " sec";
+						c = Color::FromArgb(BYTE(fourier[row * cutFFTWidth + col] * 255.0), BYTE(fourier[row * cutFFTWidth + col] * 255.0), BYTE(fourier[row * cutFFTWidth + col] * 255.0));
+						surface->SetPixel(col, row, c);
+					}
 
-			float* variancePredict = (float*)dense8.Result.CpuP;
-			VarianceLbl->Text = variancePredict[0].ToString();
+				/*
+					Host => ram
+					Device => graphics memory
+				*/
 
+				inputImage.host2Device();
+
+				clock_t start = clock();
+
+				dense.apply(&inputImage);
+				gpuRelu(&dense.Result);
+				batchNorm.apply(&dense.Result);
+
+				dense1.apply(&dense.Result);
+				gpuRelu(&dense1.Result);
+				batchNorm1.apply(&dense1.Result);
+
+				dense2.apply(&dense1.Result);
+				gpuRelu(&dense2.Result);
+				batchNorm2.apply(&dense2.Result);
+
+				dense3.apply(&dense2.Result);
+				gpuRelu(&dense3.Result);
+				batchNorm3.apply(&dense3.Result);
+
+				dense4.apply(&dense3.Result);
+				gpuRelu(&dense4.Result);
+				batchNorm4.apply(&dense4.Result);
+
+				dense5.apply(&dense4.Result);
+				gpuRelu(&dense5.Result);
+				batchNorm5.apply(&dense5.Result);
+
+				dense6.apply(&dense5.Result);
+				gpuRelu(&dense6.Result);
+				batchNorm6.apply(&dense6.Result);
+
+				dense7.apply(&dense6.Result);
+				gpuRelu(&dense7.Result);
+				batchNorm7.apply(&dense7.Result);
+
+				dense8.apply(&dense7.Result);
+				gpuSigmoid(&dense8.Result);
+				dense8.Result.device2Host();
+
+				clock_t end = clock();
+				MultTimeLbl->Text = ((float)(end - start) / CLOCKS_PER_SEC).ToString() + " sec";
+
+				float* variancePredict = (float*)dense8.Result.CpuP;
+				VarianceLbl->Text = variancePredict[0].ToString();
+
+				chart1->Series["Variance"]->Points->AddXY(imageIndex, variancePredict[0]);
+
+			}
+
+			delete[] Real_part;
+			delete[] Im_part;
+			delete[] image;
+			delete[] fourier;
+			delete[] cutFFT;
+			delete[] buffer;
+			delete[] raw_intensity;
 		}
 	}
 	};

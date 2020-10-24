@@ -75,8 +75,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\opencv\build\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\opencv\build\x64\vc14\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -107,7 +107,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>cudart.lib;opencv_world411d.lib</AdditionalDependencies>
+      <AdditionalDependencies>cudart.lib</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>Main</EntryPointSymbol>
     </Link>
@@ -147,17 +147,21 @@
     <ClCompile Include="BatchNormalization.cpp" />
     <ClCompile Include="CpuGpuMat.cpp" />
     <ClCompile Include="Dense.cpp" />
-    <ClCompile Include="ImageProcessing.cpp" />
+    <ClCompile Include="FFT.cpp" />
+    <ClCompile Include="Image.cpp" />
     <ClCompile Include="MyForm.cpp" />
+    <ClCompile Include="Process.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BatchNormalization.h" />
     <ClInclude Include="CpuGpuMat.h" />
     <ClInclude Include="Dense.h" />
-    <ClInclude Include="ImageProcessing.h" />
+    <ClInclude Include="FFT.h" />
+    <ClInclude Include="Image.h" />
     <ClInclude Include="MyForm.h">
       <FileType>CppForm</FileType>
     </ClInclude>
+    <ClInclude Include="Process.h" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="MyForm.resx">
