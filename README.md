@@ -15,6 +15,10 @@ Keras model weights are used in the CPP environment.
 * Bach Normalization
 * Sigmoid Activation
 
+### ANN Model Design
+![alt text](https://github.com/fbasatemur/FFT-Variance_ANN_with_CUDA_CPP/blob/master/doc/model_ANN.jpg)
+
+
 Keras model consists of 9 Dense layers and 8 Batch Normalization layers. The model takes the vector of the Fast Fourier Transform image of 25x25 = 625 from the input.
 Output Layer consists of 1 neuron and returns the variance value.
 
