@@ -12,7 +12,7 @@ public:
 	Dense(int neurons, int inputRows, int inputCols, bool useBias = true);
 
 	void load(std::string& kernelFilename, std::string& biasFilename);
-	void apply(CpuGpuMat* input);
+	void apply(CpuGpuMat* input, int inStartIndex = 0, int resStartIndex = 0);
 	void host2Device();
 
 	int neurons;

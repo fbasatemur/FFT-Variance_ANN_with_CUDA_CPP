@@ -5,10 +5,11 @@
 
 CpuGpuMat::CpuGpuMat() {}
 
-CpuGpuMat::CpuGpuMat(const int& rows, const int& cols, bool useBias) {
+CpuGpuMat::CpuGpuMat(const int& rows, const int& cols, bool useBias, bool useMemPin) {
 	this->Rows = rows;
 	this->Cols = useBias ? cols + 1 : cols;
 	this->Size = this->Rows * this->Cols;
+	this->isMemPinned = useMemPin;
 
 	cpuGpuAlloc();
 
@@ -23,7 +24,12 @@ CpuGpuMat::~CpuGpuMat() {
 	cudaError_t result = cudaFree(this->GpuP);
 	assert(result == cudaSuccess);
 
-	free(this->CpuP);
+	if (isMemPinned) {
+		result = cudaFreeHost(this->CpuP);
+		assert(result == cudaSuccess);
+	}
+	else free(this->CpuP);
+
 }
 
 void CpuGpuMat::host2Device() {
@@ -38,7 +44,11 @@ void CpuGpuMat::device2Host() {
 
 void CpuGpuMat::cpuGpuAlloc() {
 
-	this->CpuP = (void*)malloc(getAllocationSize());
+	if (this->isMemPinned) {
+		cudaError_t result = cudaHostAlloc(&this->CpuP, getAllocationSize(), 0);
+		assert(result == cudaSuccess);
+	}
+	else this->CpuP = (void*)malloc(getAllocationSize());
 
 	cudaError_t result = cudaMalloc(&this->GpuP, getAllocationSize());
 	assert(result == cudaSuccess);

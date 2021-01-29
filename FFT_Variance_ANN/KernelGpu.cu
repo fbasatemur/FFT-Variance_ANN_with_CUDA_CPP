@@ -10,7 +10,7 @@
 	 nvcc'in compile edecegi metodlar "KernelGpu.cuh" icerisinde declare edilir ve burada tanimlanmalidir
  */
 
-__global__ void gpuMatrixMult(float* gpuMat1, float* gpuMat2, float* gpuMat3, int m1Rows, int m1Cols, int m2Cols)
+__global__ void gpuMatrixMult(float* gpuMat1, float* gpuMat2, float* gpuMat3, int m1Rows, int m1Cols, int m2Cols, int inStartIndex, int resStartIndex)
 {
 	int row = blockIdx.y * blockDim.y + threadIdx.y;
 	int col = blockIdx.x * blockDim.x + threadIdx.x;
@@ -21,10 +21,10 @@ __global__ void gpuMatrixMult(float* gpuMat1, float* gpuMat2, float* gpuMat3, in
 	if (row < m1Rows && col < m2Cols) {
 		for (int i = 0; i < m1Cols; i++) {
 
-			sum += gpuMat1[row * m1Cols + i] * gpuMat2[i * m2Cols + col];
+			sum += gpuMat1[inStartIndex + row * m1Cols + i] * gpuMat2[i * m2Cols + col];
 		}
 		/*printf("%f\n", sum);*/
-		gpuMat3[row * m2Cols + col] = sum;
+		gpuMat3[resStartIndex + row * m2Cols + col] = sum;
 	}
 }
 
@@ -45,12 +45,12 @@ __global__ void gpuReluActivation(float* GpuP, int size)
 		GpuP[id] = GpuP[id] > 0 ? GpuP[id] : 0;
 	}
 }
-__global__ void gpuSigmoidActivation(float* GpuP, int size)
+__global__ void gpuSigmoidActivation(float* GpuP, int size, int startIndex)
 {
 	int id = blockIdx.x * blockDim.x + threadIdx.x;
 
 	if (id < size) {
-		GpuP[id] = (float)(1.0 / (1.0 + exp(-1.0 * (double)GpuP[id])));
+		GpuP[startIndex + id] = (float)(1.0 / (1.0 + exp(-1.0 * (double)GpuP[startIndex + id])));
 	}
 }
 
@@ -70,7 +70,7 @@ __global__ void gpuBatchNorm(float* gpuResult, float* gpuBeta, float* gpuGamma, 
 	vscc gpuMatrixMult'e kadar compile eder; gpuMatrixMult fonksiyonunu ise nvcc compile eder ve paralel kosar.
 */
 
-void gpuMatrixMultiplication(CpuGpuMat* Mat1, CpuGpuMat* Mat2, CpuGpuMat* Mat3)
+void gpuMatrixMultiplication(CpuGpuMat* Mat1, CpuGpuMat* Mat2, CpuGpuMat* Mat3, int inStartIndex, int resStartIndex)
 {
 	//vscc
 	int threadsPerBlock = 32;
@@ -82,7 +82,7 @@ void gpuMatrixMultiplication(CpuGpuMat* Mat1, CpuGpuMat* Mat2, CpuGpuMat* Mat3)
 	dim3 blockDim(threadsPerBlock, threadsPerBlock);
 
 	//nvcc
-	gpuMatrixMult << < gridDim, blockDim >> > ((float*)Mat1->GpuP, (float*)Mat2->GpuP, (float*)Mat3->GpuP, Mat1->Rows, Mat1->Cols, Mat2->Cols);
+	gpuMatrixMult << < gridDim, blockDim >> > ((float*)Mat1->GpuP, (float*)Mat2->GpuP, (float*)Mat3->GpuP, Mat1->Rows, Mat1->Cols, Mat2->Cols, inStartIndex, resStartIndex);
 }
 
 
@@ -102,12 +102,12 @@ void gpuRelu(CpuGpuMat* Mat)
 	gpuReluActivation << < blocksPerGrid, threadsPerBlock >> > ((float*)Mat->GpuP, Mat->Size);
 }
 
-void gpuSigmoid(CpuGpuMat* Mat) {
+void gpuSigmoid(CpuGpuMat* Mat, int startIndex = 0) {
 
 	int threadsPerBlock = 32;
 	int blocksPerGrid = ceil(double(Mat->Size) / double(threadsPerBlock));
 
-	gpuSigmoidActivation << < blocksPerGrid, threadsPerBlock >> > ((float*)Mat->GpuP, Mat->Size);
+	gpuSigmoidActivation << < blocksPerGrid, threadsPerBlock >> > ((float*)Mat->GpuP, Mat->Size, startIndex);
 }
 
 void gpuBatchNormalization(CpuGpuMat* result, CpuGpuMat* beta, CpuGpuMat* gamma, CpuGpuMat* movingMean, CpuGpuMat* movingVariance, float epsilon) {
