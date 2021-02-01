@@ -19,107 +19,124 @@ Keras model weights are used in the CPP environment.
 ![alt text](https://github.com/fbasatemur/FFT-Variance_ANN_with_CUDA_CPP/blob/master/doc/model_ANN.jpg)
 
 
-Keras model consists of 9 Dense layers and 8 Batch Normalization layers. The model takes the vector of the Fast Fourier Transform image of 25x25 = 625 from the input.
+Keras model consists of 9 Dense layers and 8 Batch Normalization layers. </br>
+The model takes the vector of the Fast Fourier Transform image of 25x25 = 625 from the input. </br>
 Output Layer consists of 1 neuron and returns the variance value.
-
 ```ini
-CpuGpuMat inputImage(1, 625);   // CpuGpuMat inputVector(1, cols, bias=true)
 
-Dense dense(100, inputImage.Rows, inputImage.Cols);               // Dense dense(neurons, inputVector.Rows, inputVector.Cols, bias=true)
-Dense dense1(100, dense.Result.Rows, dense.Result.Cols);
-Dense dense2(100, dense1.Result.Rows, dense1.Result.Cols);
-Dense dense3(100, dense2.Result.Rows, dense2.Result.Cols);
-Dense dense4(100, dense3.Result.Rows, dense3.Result.Cols);
-Dense dense5(100, dense4.Result.Rows, dense4.Result.Cols);
-Dense dense6(100, dense5.Result.Rows, dense5.Result.Cols);
-Dense dense7(20, dense6.Result.Rows, dense6.Result.Cols);
-Dense dense8(1, dense7.Result.Rows, dense7.Result.Cols, false);   // Bias value cannot be added to the output result in the last layer.
+dense = new Dense(100, 1, 625);                 // Dense(neurons, inputVector.Rows, inputVector.Cols, isEndlayer = false, isMemPin = false)
+dense1 = new Dense(100, dense->Result);         // Each layer gets the result values of the previous layer
+dense2 = new Dense(100, dense1->Result);
+dense3 = new Dense(100, dense2->Result);
+dense4 = new Dense(100, dense3->Result);
+dense5 = new Dense(100, dense4->Result);
+dense6 = new Dense(100, dense5->Result);
+dense7 = new Dense(20, dense6->Result);
+dense8 = new Dense(1, dense7->Result, true);   // Yeaaap, dense8 is end layer
 ```
 
 The size of the layer input depends on the output size of the previous layer. Batch Normalization layers are then created.
-
 ```ini
-BatchNormalization batchNorm(dense.Result.Rows, dense.Result.Cols);
-BatchNormalization batchNorm1(dense1.Result.Rows, dense1.Result.Cols);
-BatchNormalization batchNorm2(dense2.Result.Rows, dense2.Result.Cols);
-BatchNormalization batchNorm3(dense3.Result.Rows, dense3.Result.Cols);
-BatchNormalization batchNorm4(dense4.Result.Rows, dense4.Result.Cols);
-BatchNormalization batchNorm5(dense5.Result.Rows, dense5.Result.Cols);
-BatchNormalization batchNorm6(dense6.Result.Rows, dense6.Result.Cols);
-BatchNormalization batchNorm7(dense7.Result.Rows, dense7.Result.Cols);  
+batchNorm = new BatchNormalization(dense->Result);
+batchNorm1 = new BatchNormalization(dense1->Result);
+batchNorm2 = new BatchNormalization(dense2->Result);
+batchNorm3 = new BatchNormalization(dense3->Result);
+batchNorm4 = new BatchNormalization(dense4->Result);
+batchNorm5 = new BatchNormalization(dense5->Result);
+batchNorm6 = new BatchNormalization(dense6->Result);
+batchNorm7 = new BatchNormalization(dense7->Result); 
 ```
 
-Batch Normalization layers are dependent on the output size of the dense layers to be applied. Then the weights of the dense and batchnormalization layers are loaded.
+Batch Normalization layers are dependent on the output size of the dense layers to be applied. </br>
+Then the weights of the dense and batchnormalization layers are loaded.
 ``` ini
 std::string denseKernel = ".\\model_save_weight.h5_to_txt\\dense\\kernel.txt";
 std::string denseBias = ".\\model_save_weight.h5_to_txt\\dense\\bias.txt";
+...
+std::string dense8Kernel = ".\\model_save_weight.h5_to_txt\\dense_8\\kernel.txt";
+std::string dense8Bias = ".\\model_save_weight.h5_to_txt\\dense_8\\bias.txt";
 
-dense.load(denseKernel, denseBias);
+dense->Load(denseKernel, denseBias);
+...
+dense8->Load(dense8Kernel, dense8Bias);
+
 ```
 ``` ini
 std::string batchNormBeta = ".\\model_save_weight.h5_to_txt\\batch_normalization\\beta.txt";
 std::string batchNormGamma = ".\\model_save_weight.h5_to_txt\\batch_normalization\\gamma.txt";
 std::string batchNormMovingMean = ".\\model_save_weight.h5_to_txt\\batch_normalization\\moving_mean.txt";
 std::string batchNormMovingVariance = ".\\model_save_weight.h5_to_txt\\batch_normalization\\moving_variance.txt";
-
+...
 batchNorm.load(batchNormBeta, batchNormGamma, batchNormMovingMean, batchNormMovingVariance);
+...
 ```
+
 The then, ram memory is copied into the graphics card memory.
 ```ini
-dense.host2Device();
+dense->Host2Device();
 ...
 
-batchNorm.host2Device();
+batchNorm->Host2Device();
 ...
 
-inputImage.host2Device();
 ```
 
-Next, ANN is created.
-
+After the inputs to be given to ANN are determined, the inputs should be given to ANN. </br>
+The inputs must be of type CpuGpuMat to be able to export to ANN. </br>
+Result variable of the last layer must be given in order to get the predict results.
 ```ini
-dense.apply(&inputImage);
-gpuRelu(&dense.Result);
-batchNorm.apply(&dense.Result);
+CpuGpuMat inputBuffer(inputs, 1, 625, number_of_samples, true);     // (neurons, inputVector.Rows, inputVector.Cols, isMemPin = true)
+CpuGpuMat outputBuffer(dense8->Result, number_of_samples);
+```
+Memory pinning (isMemPin = true) speeds up memory transfer. However, 1 MB or more is recommended. You can look [**here**](https://developer.nvidia.com/blog/how-optimize-data-transfers-cuda-cc/) for more.
+inputs to ANN will be given using "inputBuffer"; outputs will be taken using "outputBuffer". </br>
+Next, ANN is created. Iteration is made as much as the "number_of_samples" to be given to ANN.
+```ini
+dense->Apply(&inputBuffer, i);       // In every iteration "i" must be increased by one
+gpuRelu(&dense->Result);
+batchNorm->Apply(&dense->Result);
 
-dense1.apply(&dense.Result);
-gpuRelu(&dense1.Result);
-batchNorm1.apply(&dense1.Result);
+dense1->Apply(&dense->Result);
+gpuRelu(&dense1->Result);
+batchNorm1->Apply(&dense1->Result);
 
-dense2.apply(&dense1.Result);
-gpuRelu(&dense2.Result);
-batchNorm2.apply(&dense2.Result);
+dense2->Apply(&dense1->Result);
+gpuRelu(&dense2->Result);
+batchNorm2->Apply(&dense2->Result);
 
-dense3.apply(&dense2.Result);
-gpuRelu(&dense3.Result);
-batchNorm3.apply(&dense3.Result);
+dense3->Apply(&dense2->Result);
+gpuRelu(&dense3->Result);
+batchNorm3->Apply(&dense3->Result);
 
-dense4.apply(&dense3.Result);
-gpuRelu(&dense4.Result);
-batchNorm4.apply(&dense4.Result);
+dense4->Apply(&dense3->Result);
+gpuRelu(&dense4->Result);
+batchNorm4->Apply(&dense4->Result);
 
-dense5.apply(&dense4.Result);
-gpuRelu(&dense5.Result);
-batchNorm5.apply(&dense5.Result);
+dense5->Apply(&dense4->Result);
+gpuRelu(&dense5->Result);
+batchNorm5->Apply(&dense5->Result);
 
-dense6.apply(&dense5.Result);
-gpuRelu(&dense6.Result);
-batchNorm6.apply(&dense6.Result);
+dense6->Apply(&dense5->Result);
+gpuRelu(&dense6->Result);
+batchNorm6->Apply(&dense6->Result);
 
-dense7.apply(&dense6.Result);
-gpuRelu(&dense7.Result);
-batchNorm7.apply(&dense7.Result);
+dense7->Apply(&dense6->Result);
+gpuRelu(&dense7->Result);
+batchNorm7->Apply(&dense7->Result);
 
-dense8.apply(&dense7.Result);
-gpuSigmoid(&dense8.Result);
-dense8.Result.device2Host();    // The output of the last layer is copied to ram memory so that you can see the result.
+dense8->Apply(&dense7->Result, 0, i);   // In every iteration "i" must be increased by one
+gpuSigmoid(&dense8->Result, i);         
 ```
 
-Finally the result value is read
-
+"outputBuffer" is copied to ram memory so that you can see the result.
 ```ini
-float* variancePredict = (float*)dense8.Result.CpuP;
-VarianceLbl->Text = variancePredict[0].ToString();
+outputBuffer.Device2Host();
+```
+
+Finally the result value is read. There output value as much as "number_of_samples"
+```ini
+float* predicts = (float*)outputBuffer.CpuP;
+VarianceLbl->Text = predicts[0].ToString();
 ```
 
 ### How to use Keras model weights in the C environment ?
