@@ -11,8 +11,8 @@ Keras model weights are used in the CPP environment.
 
 ### Features of the Keras model
 * Dense Layer
-* ReLu Activation
-* Bach Normalization
+* ReLU Activation
+* Batch Normalization
 * Sigmoid Activation
 
 ### ANN Model Design
@@ -88,44 +88,47 @@ Result variable of the last layer must be given in order to get the predict resu
 CpuGpuMat inputBuffer(inputs, 1, 625, number_of_samples, true);     // (neurons, inputVector.Rows, inputVector.Cols, isMemPin = true)
 CpuGpuMat outputBuffer(dense8->Result, number_of_samples);
 ```
-Memory pinning (isMemPin = true) speeds up memory transfer. However, 1 MB or more is recommended. You can look [**here**](https://developer.nvidia.com/blog/how-optimize-data-transfers-cuda-cc/) for more.
-inputs to ANN will be given using "inputBuffer"; outputs will be taken using "outputBuffer". </br>
+Memory pinning (isMemPin = true) speeds up memory transfer. However, 1 MB or more is recommended. You can look [**here**](https://developer.nvidia.com/blog/how-optimize-data-transfers-cuda-cc/) for more. </br>
+Inputs to ANN will be given using "inputBuffer"; outputs will be taken using "outputBuffer". </br>
 Next, ANN is created. Iteration is made as much as the "number_of_samples" to be given to ANN.
 ```ini
-dense->Apply(&inputBuffer, i);       // In every iteration "i" must be increased by one
-gpuRelu(&dense->Result);
-batchNorm->Apply(&dense->Result);
+for (int i = 0; i < number_of_samples; i++){
 
-dense1->Apply(&dense->Result);
-gpuRelu(&dense1->Result);
-batchNorm1->Apply(&dense1->Result);
+    dense->Apply(&inputBuffer, i);       // In every iteration "i" must be increased by one
+    gpuRelu(&dense->Result);
+    batchNorm->Apply(&dense->Result);
 
-dense2->Apply(&dense1->Result);
-gpuRelu(&dense2->Result);
-batchNorm2->Apply(&dense2->Result);
+    dense1->Apply(&dense->Result);
+    gpuRelu(&dense1->Result);
+    batchNorm1->Apply(&dense1->Result);
 
-dense3->Apply(&dense2->Result);
-gpuRelu(&dense3->Result);
-batchNorm3->Apply(&dense3->Result);
+    dense2->Apply(&dense1->Result);
+    gpuRelu(&dense2->Result);
+    batchNorm2->Apply(&dense2->Result);
 
-dense4->Apply(&dense3->Result);
-gpuRelu(&dense4->Result);
-batchNorm4->Apply(&dense4->Result);
+    dense3->Apply(&dense2->Result);
+    gpuRelu(&dense3->Result);
+    batchNorm3->Apply(&dense3->Result);
 
-dense5->Apply(&dense4->Result);
-gpuRelu(&dense5->Result);
-batchNorm5->Apply(&dense5->Result);
+    dense4->Apply(&dense3->Result);
+    gpuRelu(&dense4->Result);
+    batchNorm4->Apply(&dense4->Result);
 
-dense6->Apply(&dense5->Result);
-gpuRelu(&dense6->Result);
-batchNorm6->Apply(&dense6->Result);
+    dense5->Apply(&dense4->Result);
+    gpuRelu(&dense5->Result);
+    batchNorm5->Apply(&dense5->Result);
 
-dense7->Apply(&dense6->Result);
-gpuRelu(&dense7->Result);
-batchNorm7->Apply(&dense7->Result);
+    dense6->Apply(&dense5->Result);
+    gpuRelu(&dense6->Result);
+    batchNorm6->Apply(&dense6->Result);
 
-dense8->Apply(&dense7->Result, 0, i);   // In every iteration "i" must be increased by one
-gpuSigmoid(&dense8->Result, i);         
+    dense7->Apply(&dense6->Result);
+    gpuRelu(&dense7->Result);
+    batchNorm7->Apply(&dense7->Result);
+
+    dense8->Apply(&dense7->Result, 0, i);   // In every iteration "i" must be increased by one
+    gpuSigmoid(&dense8->Result, i); 
+}
 ```
 
 "outputBuffer" is copied to ram memory so that you can see the result.
