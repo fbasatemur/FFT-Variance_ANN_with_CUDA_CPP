@@ -38,7 +38,6 @@ namespace Form_Empty {
 			//TODO: Add the confilePathStructor code here
 			//
 
-			inputImage = new CpuGpuMat(1, 625);
 
 			std::string denseKernel = ".\\model_save_weight.h5_to_txt\\dense_9\\kernel.txt";
 			std::string denseBias = ".\\model_save_weight.h5_to_txt\\dense_9\\bias.txt";
@@ -67,27 +66,27 @@ namespace Form_Empty {
 			std::string dense8Kernel = ".\\model_save_weight.h5_to_txt\\dense_17\\kernel.txt";
 			std::string dense8Bias = ".\\model_save_weight.h5_to_txt\\dense_17\\bias.txt";
 
-			dense = new Dense(100, inputImage->Rows, inputImage->Cols);
-			dense1 = new Dense(100, dense->Result.Rows, dense->Result.Cols);
-			dense2 = new Dense(100, dense1->Result.Rows, dense1->Result.Cols);
-			dense3 = new Dense(100, dense2->Result.Rows, dense2->Result.Cols);
-			dense4 = new Dense(100, dense3->Result.Rows, dense3->Result.Cols);
-			dense5 = new Dense(100, dense4->Result.Rows, dense4->Result.Cols);
-			dense6 = new Dense(100, dense5->Result.Rows, dense5->Result.Cols);
-			dense7 = new Dense(20, dense6->Result.Rows, dense6->Result.Cols);
-			dense8 = new Dense(1, dense7->Result.Rows, dense7->Result.Cols, false);
+			dense = new Dense(100, 1, 625);
+			dense1 = new Dense(100, dense->Result);
+			dense2 = new Dense(100, dense1->Result);
+			dense3 = new Dense(100, dense2->Result);
+			dense4 = new Dense(100, dense3->Result);
+			dense5 = new Dense(100, dense4->Result);
+			dense6 = new Dense(100, dense5->Result);
+			dense7 = new Dense(20, dense6->Result);
+			dense8 = new Dense(1, dense7->Result, true);
 
-			// load kernel and bias weights to ram
+			// Load kernel and bias weights to ram
 
-			dense->load(denseKernel, denseBias);
-			dense1->load(dense1Kernel, dense1Bias);
-			dense2->load(dense2Kernel, dense2Bias);
-			dense3->load(dense3Kernel, dense3Bias);
-			dense4->load(dense4Kernel, dense4Bias);
-			dense5->load(dense5Kernel, dense5Bias);
-			dense6->load(dense6Kernel, dense6Bias);
-			dense7->load(dense7Kernel, dense7Bias);
-			dense8->load(dense8Kernel, dense8Bias);
+			dense->Load(denseKernel, denseBias);
+			dense1->Load(dense1Kernel, dense1Bias);
+			dense2->Load(dense2Kernel, dense2Bias);
+			dense3->Load(dense3Kernel, dense3Bias);
+			dense4->Load(dense4Kernel, dense4Bias);
+			dense5->Load(dense5Kernel, dense5Bias);
+			dense6->Load(dense6Kernel, dense6Bias);
+			dense7->Load(dense7Kernel, dense7Bias);
+			dense8->Load(dense8Kernel, dense8Bias);
 
 			std::string batchNormBeta = ".\\model_save_weight.h5_to_txt\\batch_normalization_8\\beta.txt";
 			std::string batchNormGamma = ".\\model_save_weight.h5_to_txt\\batch_normalization_8\\gamma.txt";
@@ -131,46 +130,46 @@ namespace Form_Empty {
 
 			// gamma = 1.0F, beta = 0.0F, epsilon = 0.001F 
 
-			batchNorm = new BatchNormalization(dense->Result.Rows, dense->Result.Cols);
-			batchNorm1 = new BatchNormalization(dense1->Result.Rows, dense1->Result.Cols);
-			batchNorm2 = new BatchNormalization(dense2->Result.Rows, dense2->Result.Cols);
-			batchNorm3 = new BatchNormalization(dense3->Result.Rows, dense3->Result.Cols);
-			batchNorm4 = new BatchNormalization(dense4->Result.Rows, dense4->Result.Cols);
-			batchNorm5 = new BatchNormalization(dense5->Result.Rows, dense5->Result.Cols);
-			batchNorm6 = new BatchNormalization(dense6->Result.Rows, dense6->Result.Cols);
-			batchNorm7 = new BatchNormalization(dense7->Result.Rows, dense7->Result.Cols);
+			batchNorm = new BatchNormalization(dense->Result);
+			batchNorm1 = new BatchNormalization(dense1->Result);
+			batchNorm2 = new BatchNormalization(dense2->Result);
+			batchNorm3 = new BatchNormalization(dense3->Result);
+			batchNorm4 = new BatchNormalization(dense4->Result);
+			batchNorm5 = new BatchNormalization(dense5->Result);
+			batchNorm6 = new BatchNormalization(dense6->Result);
+			batchNorm7 = new BatchNormalization(dense7->Result);
 
-			// load batchnormalization layer weights to ram
+			// Load batchnormalization layer weights to ram
 
-			batchNorm->load(batchNormBeta, batchNormGamma, batchNormMovingMean, batchNormMovingVariance);
-			batchNorm1->load(batchNorm1Beta, batchNorm1Gamma, batchNorm1MovingMean, batchNorm1MovingVariance);
-			batchNorm2->load(batchNorm2Beta, batchNorm2Gamma, batchNorm2MovingMean, batchNorm2MovingVariance);
-			batchNorm3->load(batchNorm3Beta, batchNorm3Gamma, batchNorm3MovingMean, batchNorm3MovingVariance);
-			batchNorm4->load(batchNorm4Beta, batchNorm4Gamma, batchNorm4MovingMean, batchNorm4MovingVariance);
-			batchNorm5->load(batchNorm5Beta, batchNorm5Gamma, batchNorm5MovingMean, batchNorm5MovingVariance);
-			batchNorm6->load(batchNorm6Beta, batchNorm6Gamma, batchNorm6MovingMean, batchNorm6MovingVariance);
-			batchNorm7->load(batchNorm7Beta, batchNorm7Gamma, batchNorm7MovingMean, batchNorm7MovingVariance);
+			batchNorm->Load(batchNormBeta, batchNormGamma, batchNormMovingMean, batchNormMovingVariance);
+			batchNorm1->Load(batchNorm1Beta, batchNorm1Gamma, batchNorm1MovingMean, batchNorm1MovingVariance);
+			batchNorm2->Load(batchNorm2Beta, batchNorm2Gamma, batchNorm2MovingMean, batchNorm2MovingVariance);
+			batchNorm3->Load(batchNorm3Beta, batchNorm3Gamma, batchNorm3MovingMean, batchNorm3MovingVariance);
+			batchNorm4->Load(batchNorm4Beta, batchNorm4Gamma, batchNorm4MovingMean, batchNorm4MovingVariance);
+			batchNorm5->Load(batchNorm5Beta, batchNorm5Gamma, batchNorm5MovingMean, batchNorm5MovingVariance);
+			batchNorm6->Load(batchNorm6Beta, batchNorm6Gamma, batchNorm6MovingMean, batchNorm6MovingVariance);
+			batchNorm7->Load(batchNorm7Beta, batchNorm7Gamma, batchNorm7MovingMean, batchNorm7MovingVariance);
 
 			// copy to graphic card memory from ram
 
-			dense->host2Device();
-			dense1->host2Device();
-			dense2->host2Device();
-			dense3->host2Device();
-			dense4->host2Device();
-			dense5->host2Device();
-			dense6->host2Device();
-			dense7->host2Device();
-			dense8->host2Device();
+			dense->Host2Device();
+			dense1->Host2Device();
+			dense2->Host2Device();
+			dense3->Host2Device();
+			dense4->Host2Device();
+			dense5->Host2Device();
+			dense6->Host2Device();
+			dense7->Host2Device();
+			dense8->Host2Device();
 
-			batchNorm->host2Device();
-			batchNorm1->host2Device();
-			batchNorm2->host2Device();
-			batchNorm3->host2Device();
-			batchNorm4->host2Device();
-			batchNorm5->host2Device();
-			batchNorm6->host2Device();
-			batchNorm7->host2Device();
+			batchNorm->Host2Device();
+			batchNorm1->Host2Device();
+			batchNorm2->Host2Device();
+			batchNorm3->Host2Device();
+			batchNorm4->Host2Device();
+			batchNorm5->Host2Device();
+			batchNorm6->Host2Device();
+			batchNorm7->Host2Device();
 		}
 
 	protected:
@@ -208,7 +207,6 @@ namespace Form_Empty {
 		/// </summary>
 		System::ComponentModel::Container^ components;
 
-		CpuGpuMat* inputImage;
 		Dense* dense;
 		Dense* dense1;
 		Dense* dense2;
@@ -486,27 +484,19 @@ namespace Form_Empty {
 			int beginRow, beginCol;
 			int setRow, setCol;
 
-			Bitmap^ surface = gcnew Bitmap(cutFFTWidth, cutFFTHeight);
-			pictureBox2->Image = surface;
-			Color c;
 
 			chart1->Series["Variance"]->Points->Clear();
 
 			clock_t totalTransferTime = 0;
 			clock_t totalPredictTime = 0;
-
 			clock_t startPredict;
 			clock_t start;
 
 			int selectedImages = openFileDialog1->FileNames->GetLength(0);
 
-			CpuGpuMat inputBuffer(1, inputImage->Size * selectedImages, false, true);
-			CpuGpuMat outputBuffer(dense8->Result.Rows, dense8->Result.Cols * selectedImages, false, true);
-
-			dense8->Result.GpuP = outputBuffer.GpuP;
-
 			// ANN input values pointer
-			float* inputP = (float*)inputBuffer.CpuP;
+			int inputSize = cutFFTWidth * cutFFTHeight;
+			float* inputs = new float[inputSize * selectedImages];
 
 			for (int imageIndex = 0; imageIndex < selectedImages; imageIndex++)
 			{
@@ -519,12 +509,11 @@ namespace Form_Empty {
 				buffer = LoadBMP(width, height, size, (LPCTSTR)str);
 				raw_intensity = ConvertBMPToIntensity(buffer, width, height);
 
-
 				beginRow = (height - cutRawHeight) / 2;
 				beginCol = (width - cutRawWidth) / 2;
 
 				// image is cut 100 *100 size from center of raw_intensity
-				// Gri seviyeyedeki image frekans domeninde ortalanmasi için (-1)^(x+y) ile carpiliyor
+				// Gri seviyeyedeki image frekans domeninde ortalanmasi icin (-1)^(x+y) ile carpiliyor
 				for (int i = beginRow; i < beginRow + 100; i++)
 					for (int j = beginCol; j < beginCol + 100; j++)
 						image[(i - beginRow) * cutRawWidth + (j - beginCol)] = double(raw_intensity[i * width + j]) * pow(-1, (i + j));
@@ -532,7 +521,6 @@ namespace Form_Empty {
 
 				// calculate 100 * 100 size FFT image
 				FFT2D(image, Real_part, Im_part, cutRawWidth, cutRawHeight);
-
 
 				double fftValue;
 				double maks1 = -1000000000;
@@ -554,25 +542,23 @@ namespace Form_Empty {
 					}
 				}
 
-				// 25*25 FFT image 0-1 normalize
+				// 25 * 25 FFT image 0-1 normalize
 				for (int i = 0; i < cutFFTHeight; i++)
 					for (int j = 0; j < cutFFTWidth; j++)
 						fourier[i * cutFFTWidth + j] = (cutFFT[i * cutFFTWidth + j] - min1) / (maks1 - min1);
 
 
-
 				// ANN input values is setted
-				for (int row = 0; row < cutFFTHeight; row++)
-					for (int col = 0; col < cutFFTWidth; col++)
-						inputP[inputImage->Size * imageIndex + row * cutFFTWidth + col] = float(fourier[row * cutFFTWidth + col]);
-
-
-				inputP[inputImage->Size * imageIndex + inputImage->Size - 1] = 1.0;		// bias
+				for (int i = 0; i < inputSize; i++)
+					inputs[inputSize * imageIndex + i] = (float)fourier[i];
 
 				delete[] buffer;
 				delete[] raw_intensity;
 			}
 
+			Bitmap^ surface = gcnew Bitmap(cutFFTWidth, cutFFTHeight);
+			pictureBox2->Image = surface;
+			Color c;
 			// display in pictureBox 
 			for (int row = 0; row < cutFFTHeight; row++)
 				for (int col = 0; col < cutFFTWidth; col++) {
@@ -582,76 +568,74 @@ namespace Form_Empty {
 				}
 
 
-			start = clock();
-			inputBuffer.host2Device();
-			totalTransferTime += (clock() - start);
+			CpuGpuMat inputBuffer(inputs, 1, 625, selectedImages, true);
+			CpuGpuMat outputBuffer(dense8->Result, selectedImages);
 
-			inputImage->GpuP = inputBuffer.GpuP;
+			/*
+				Host => ram
+				Device => graphics memory
+			*/
+
+			start = clock();
+			inputBuffer.Host2Device();
+			totalTransferTime += (clock() - start);
 
 			for (int i = 0; i < openFileDialog1->FileNames->GetLength(0); i++)
 			{
-				/*
-					Host => ram
-					Device => graphics memory
-				*/
-
 				startPredict = clock();
 
-				dense->apply(inputImage, i * inputImage->Size);
+				dense->Apply(&inputBuffer, i);
 				gpuRelu(&dense->Result);
-				batchNorm->apply(&dense->Result);
+				batchNorm->Apply(&dense->Result);
 
-				dense1->apply(&dense->Result);
+				dense1->Apply(&dense->Result);
 				gpuRelu(&dense1->Result);
-				batchNorm1->apply(&dense1->Result);
+				batchNorm1->Apply(&dense1->Result);
 
-				dense2->apply(&dense1->Result);
+				dense2->Apply(&dense1->Result);
 				gpuRelu(&dense2->Result);
-				batchNorm2->apply(&dense2->Result);
+				batchNorm2->Apply(&dense2->Result);
 
-				dense3->apply(&dense2->Result);
+				dense3->Apply(&dense2->Result);
 				gpuRelu(&dense3->Result);
-				batchNorm3->apply(&dense3->Result);
+				batchNorm3->Apply(&dense3->Result);
 
-				dense4->apply(&dense3->Result);
+				dense4->Apply(&dense3->Result);
 				gpuRelu(&dense4->Result);
-				batchNorm4->apply(&dense4->Result);
+				batchNorm4->Apply(&dense4->Result);
 
-				dense5->apply(&dense4->Result);
+				dense5->Apply(&dense4->Result);
 				gpuRelu(&dense5->Result);
-				batchNorm5->apply(&dense5->Result);
+				batchNorm5->Apply(&dense5->Result);
 
-				dense6->apply(&dense5->Result);
+				dense6->Apply(&dense5->Result);
 				gpuRelu(&dense6->Result);
-				batchNorm6->apply(&dense6->Result);
+				batchNorm6->Apply(&dense6->Result);
 
-				dense7->apply(&dense6->Result);
+				dense7->Apply(&dense6->Result);
 				gpuRelu(&dense7->Result);
-				batchNorm7->apply(&dense7->Result);
+				batchNorm7->Apply(&dense7->Result);
 
-				dense8->apply(&dense7->Result, 0, i);
+				dense8->Apply(&dense7->Result, 0, i);
 				gpuSigmoid(&dense8->Result, i);
-
-				/*dense8->Result.device2Host();*/
 
 				totalPredictTime += (clock() - startPredict);
 			}
 
 			start = clock();
-			outputBuffer.device2Host();
+			outputBuffer.Device2Host();
 			totalTransferTime += (clock() - start);
 
 			TotalTimeLbl->Text = ((float)(totalTransferTime + totalPredictTime) / CLOCKS_PER_SEC).ToString() + " sec";
 			TotalTransferLbl->Text = ((float)(totalTransferTime) / CLOCKS_PER_SEC).ToString() + " sec";
 			TotalPredictLbl->Text = ((float)(totalPredictTime) / CLOCKS_PER_SEC).ToString() + " sec";
 
-			float* variancePredict = (float*)outputBuffer.CpuP;
+			float* predicts = (float*)outputBuffer.CpuP;
 
 			for (int i = 0; i < outputBuffer.Size; i++)
 			{
-				VarianceLbl->Text = variancePredict[i].ToString();
-
-				chart1->Series["Variance"]->Points->AddXY(i, variancePredict[i]);
+				VarianceLbl->Text = predicts[i].ToString();
+				chart1->Series["Variance"]->Points->AddXY(i, predicts[i]);
 			}
 
 
@@ -660,6 +644,7 @@ namespace Form_Empty {
 			delete[] image;
 			delete[] fourier;
 			delete[] cutFFT;
+			delete[] inputs;
 		}
 	}
 	};

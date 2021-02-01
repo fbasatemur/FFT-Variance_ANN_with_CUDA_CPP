@@ -1,7 +1,7 @@
 #pragma once
 #include "CpuGpuMat.h"
 
-#ifdef __cplusplus									// nvcc'in compile edebilmesi icin C dosyasi oldugunu belirt
+#ifdef __cplusplus								// nvcc'in compile edebilmesi icin C dosyasi oldugunu belirt
 extern "C"
 #endif // __cplusplus
 
