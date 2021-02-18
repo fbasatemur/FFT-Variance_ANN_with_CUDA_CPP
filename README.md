@@ -1,6 +1,10 @@
-# FFT-Variance_ANN_with_CUDA_CPP
+# Image Quality Assessment with ANN
 
-Keras model weights are used in the CPP environment.
+Our goal is to use ANN to evaluate the clarity of an image. For this, we use the FFT values of the images and the sharpness values for each image.
+Also, this repo is a reference for testing Keras model weights (file with .h5 extension) using C ++ / CUDA. 
+Dense, BatchNormalization layers used in Keras library; ReLU, Sigmoid (0-1 range) activation functions are coded using C ++ and CUDA.
+
+ANN structure and project details are given below.
 
 ### Requirements
 * Windows or Linux
@@ -13,7 +17,7 @@ Keras model weights are used in the CPP environment.
 * Dense Layer
 * ReLU Activation
 * Batch Normalization
-* Sigmoid Activation
+* Sigmoid Activation  
 
 ### ANN Model Design
 ![alt text](https://github.com/fbasatemur/FFT-Variance_ANN_with_CUDA_CPP/blob/master/doc/model_ANN.jpg)
